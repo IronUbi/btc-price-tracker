@@ -11,14 +11,19 @@ import shutil
 def get_binance_data():
     """Binance'den BTC verilerini çeker"""
     try:
-        # Binance API'si değişmeden çalışmaya devam ediyor
+        print("Binance API'sine istek gönderiliyor...")
         response = requests.get('https://api.binance.com/api/v3/ticker/bookTicker?symbol=BTCUSDT', 
-                               headers={'User-Agent': 'Mozilla/5.0'})
+                               headers={'User-Agent': 'Mozilla/5.0'}, 
+                               timeout=10)  # Timeout ekledik
+        
+        print(f"Binance API yanıt kodu: {response.status_code}")
         if response.status_code != 200:
-            print(f"Binance API yanıt kodu: {response.status_code}")
+            print(f"Binance API yanıt içeriği: {response.text[:200]}...")  # İlk 200 karakteri yazdır
             return None
             
         data = response.json()
+        print(f"Binance veri alındı: {data}")
+        
         return {
             'exchange': 'Binance',
             'timestamp': datetime.now(pytz.UTC).strftime('%Y-%m-%d %H:%M:%S'),
@@ -27,23 +32,35 @@ def get_binance_data():
             'bid_qty': float(data['bidQty']),
             'ask_qty': float(data['askQty'])
         }
+    except requests.exceptions.Timeout:
+        print("Binance API zaman aşımı hatası")
+        return None
+    except requests.exceptions.ConnectionError:
+        print("Binance API bağlantı hatası")
+        return None
     except Exception as e:
         print(f"Binance veri çekme hatası: {e}")
+        import traceback
+        traceback.print_exc()  # Tam hata izlemeyi yazdır
         return None
 
 def get_okx_data():
     """OKX'den BTC verilerini çeker"""
     try:
-        # OKX API'sine istek atma
+        print("OKX API'sine istek gönderiliyor...")
         response = requests.get('https://www.okx.com/api/v5/market/ticker?instId=BTC-USDT',
-                               headers={'User-Agent': 'Mozilla/5.0'})
+                               headers={'User-Agent': 'Mozilla/5.0'},
+                               timeout=10)  # Timeout ekledik
+        
+        print(f"OKX API yanıt kodu: {response.status_code}")
         if response.status_code != 200:
-            print(f"OKX API yanıt kodu: {response.status_code}")
+            print(f"OKX API yanıt içeriği: {response.text[:200]}...")
             return None
             
         data = response.json()
+        print(f"OKX veri alındı: {data}")
         
-        if data['code'] == '0' and len(data['data']) > 0:
+        if data.get('code') == '0' and len(data.get('data', [])) > 0:
             ticker = data['data'][0]
             return {
                 'exchange': 'OKX',
@@ -56,30 +73,72 @@ def get_okx_data():
         else:
             print(f"OKX API veri hatası: {data}")
             return None
+    except requests.exceptions.Timeout:
+        print("OKX API zaman aşımı hatası")
+        return None
+    except requests.exceptions.ConnectionError:
+        print("OKX API bağlantı hatası")
+        return None
     except Exception as e:
         print(f"OKX veri çekme hatası: {e}")
+        import traceback
+        traceback.print_exc()  # Tam hata izlemeyi yazdır
         return None
 
 def get_coinbase_data():
     """Coinbase'den BTC verilerini çeker"""
     try:
+        print("Coinbase API'sine istek gönderiliyor...")
         # Coinbase Pro API kullanıyoruz (eski GDAX)
         response = requests.get('https://api.exchange.coinbase.com/products/BTC-USD/ticker',
-                               headers={'User-Agent': 'Mozilla/5.0'})
+                               headers={'User-Agent': 'Mozilla/5.0'},
+                               timeout=10)  # Timeout ekledik
+        
+        print(f"Coinbase API yanıt kodu: {response.status_code}")
         if response.status_code != 200:
-            print(f"Coinbase API yanıt kodu: {response.status_code}")
+            print(f"Coinbase API yanıt içeriği: {response.text[:200]}...")
+            # Alternatif endpoint deneyelim
+            print("Alternatif Coinbase API'si deneniyor...")
+            try:
+                alt_response = requests.get('https://api.coinbase.com/v2/prices/BTC-USD/spot',
+                                          headers={'User-Agent': 'Mozilla/5.0'},
+                                          timeout=10)
+                
+                print(f"Alternatif Coinbase API yanıt kodu: {alt_response.status_code}")
+                if alt_response.status_code == 200:
+                    alt_data = alt_response.json()
+                    print(f"Alternatif Coinbase veri alındı: {alt_data}")
+                    
+                    price = float(alt_data['data']['amount'])
+                    return {
+                        'exchange': 'Coinbase',
+                        'timestamp': datetime.now(pytz.UTC).strftime('%Y-%m-%d %H:%M:%S'),
+                        'bid': price * 0.995,  # Yaklaşık bir değer
+                        'ask': price * 1.005,  # Yaklaşık bir değer
+                        'bid_qty': None,
+                        'ask_qty': None
+                    }
+            except Exception as alt_e:
+                print(f"Alternatif Coinbase API hatası: {alt_e}")
+                
             return None
             
         ticker_data = response.json()
+        print(f"Coinbase ticker verisi alındı: {ticker_data}")
         
         # Derinlik bilgisi alalım
+        print("Coinbase order book API'sine istek gönderiliyor...")
         order_book = requests.get('https://api.exchange.coinbase.com/products/BTC-USD/book?level=1',
-                                 headers={'User-Agent': 'Mozilla/5.0'})
+                                 headers={'User-Agent': 'Mozilla/5.0'},
+                                 timeout=10)
+        
+        print(f"Coinbase order book API yanıt kodu: {order_book.status_code}")
         if order_book.status_code != 200:
-            print(f"Coinbase order book API yanıt kodu: {order_book.status_code}")
+            print(f"Coinbase order book API yanıt içeriği: {order_book.text[:200]}...")
             book_data = {'bids': [[0, 0]], 'asks': [[0, 0]]}
         else:
             book_data = order_book.json()
+            print(f"Coinbase order book verisi alındı: {book_data}")
         
         return {
             'exchange': 'Coinbase',
@@ -89,20 +148,33 @@ def get_coinbase_data():
             'bid_qty': float(book_data['bids'][0][1]) if len(book_data['bids']) > 0 else None,
             'ask_qty': float(book_data['asks'][0][1]) if len(book_data['asks']) > 0 else None
         }
+    except requests.exceptions.Timeout:
+        print("Coinbase API zaman aşımı hatası")
+        return None
+    except requests.exceptions.ConnectionError:
+        print("Coinbase API bağlantı hatası")
+        return None
     except Exception as e:
         print(f"Coinbase veri çekme hatası: {e}")
+        import traceback
+        traceback.print_exc()  # Tam hata izlemeyi yazdır
         return None
         
 def get_kraken_data():
     """Kraken'den BTC verilerini çeker"""
     try:
+        print("Kraken API'sine istek gönderiliyor...")
         response = requests.get('https://api.kraken.com/0/public/Ticker?pair=XBTUSD',
-                               headers={'User-Agent': 'Mozilla/5.0'})
+                               headers={'User-Agent': 'Mozilla/5.0'},
+                               timeout=10)  # Timeout ekledik
+        
+        print(f"Kraken API yanıt kodu: {response.status_code}")
         if response.status_code != 200:
-            print(f"Kraken API yanıt kodu: {response.status_code}")
+            print(f"Kraken API yanıt içeriği: {response.text[:200]}...")
             return None
             
         data = response.json()
+        print(f"Kraken veri alındı: {data}")
         
         if 'error' in data and len(data['error']) > 0:
             print(f"Kraken API hata döndürdü: {data['error']}")
@@ -122,22 +194,35 @@ def get_kraken_data():
         else:
             print(f"Kraken API beklenmeyen yanıt formatı: {data}")
             return None
+    except requests.exceptions.Timeout:
+        print("Kraken API zaman aşımı hatası")
+        return None
+    except requests.exceptions.ConnectionError:
+        print("Kraken API bağlantı hatası")
+        return None
     except Exception as e:
         print(f"Kraken veri çekme hatası: {e}")
+        import traceback
+        traceback.print_exc()  # Tam hata izlemeyi yazdır
         return None
 
 def get_bybit_data():
     """Bybit'den BTC verilerini çeker"""
     try:
+        print("Bybit API'sine istek gönderiliyor...")
         response = requests.get('https://api.bybit.com/v5/market/orderbook?category=spot&symbol=BTCUSDT&limit=1',
-                               headers={'User-Agent': 'Mozilla/5.0'})
+                               headers={'User-Agent': 'Mozilla/5.0'},
+                               timeout=10)  # Timeout ekledik
+        
+        print(f"Bybit API yanıt kodu: {response.status_code}")
         if response.status_code != 200:
-            print(f"Bybit API yanıt kodu: {response.status_code}")
+            print(f"Bybit API yanıt içeriği: {response.text[:200]}...")
             return None
             
         data = response.json()
+        print(f"Bybit veri alındı: {data}")
         
-        if data['retCode'] == 0 and 'result' in data:
+        if data.get('retCode') == 0 and 'result' in data:
             result = data['result']
             bid = float(result['b'][0][0]) if 'b' in result and len(result['b']) > 0 else 0
             ask = float(result['a'][0][0]) if 'a' in result and len(result['a']) > 0 else 0
@@ -155,29 +240,47 @@ def get_bybit_data():
         else:
             print(f"Bybit API hata döndürdü: {data}")
             return None
+    except requests.exceptions.Timeout:
+        print("Bybit API zaman aşımı hatası")
+        return None
+    except requests.exceptions.ConnectionError:
+        print("Bybit API bağlantı hatası")
+        return None
     except Exception as e:
         print(f"Bybit veri çekme hatası: {e}")
+        import traceback
+        traceback.print_exc()  # Tam hata izlemeyi yazdır
         return None
 
-def get_gate_io_data():
-    """Gate.io'dan BTC verilerini çeker"""
+def get_kucoin_data():
+    """KuCoin'den BTC verilerini çeker"""
     try:
-        response = requests.get('https://api.gateio.ws/api/v4/spot/order_book?currency_pair=BTC_USDT&limit=1',
-                               headers={'User-Agent': 'Mozilla/5.0'})
+        print("KuCoin API'sine istek gönderiliyor...")
+        response = requests.get('https://api.kucoin.com/api/v1/market/orderbook/level1?symbol=BTC-USDT',
+                               headers={'User-Agent': 'Mozilla/5.0'},
+                               timeout=10)  # Timeout ekledik
+        
+        print(f"KuCoin API yanıt kodu: {response.status_code}")
         if response.status_code != 200:
-            print(f"Gate.io API yanıt kodu: {response.status_code}")
+            print(f"KuCoin API yanıt içeriği: {response.text[:200]}...")
             return None
             
         data = response.json()
+        print(f"KuCoin veri alındı: {data}")
         
-        if 'bids' in data and 'asks' in data:
-            bid = float(data['bids'][0][0]) if len(data['bids']) > 0 else 0
-            ask = float(data['asks'][0][0]) if len(data['asks']) > 0 else 0
-            bid_qty = float(data['bids'][0][1]) if len(data['bids']) > 0 else 0
-            ask_qty = float(data['asks'][0][1]) if len(data['asks']) > 0 else 0
+        if data.get('code') == '200000' and 'data' in data:
+            result = data['data']
+            
+            # Eğer bid veya ask null ise, price değerini kullan
+            bid = float(result.get('bestBid', result.get('price', 0)))
+            ask = float(result.get('bestAsk', result.get('price', 0)))
+            
+            # Eğer hacim bilgisi yoksa None olarak ayarla
+            bid_qty = float(result.get('bidSize', 0)) if 'bidSize' in result else None
+            ask_qty = float(result.get('askSize', 0)) if 'askSize' in result else None
             
             return {
-                'exchange': 'Gate.io',
+                'exchange': 'KuCoin',
                 'timestamp': datetime.now(pytz.UTC).strftime('%Y-%m-%d %H:%M:%S'),
                 'bid': bid,
                 'ask': ask,
@@ -185,10 +288,18 @@ def get_gate_io_data():
                 'ask_qty': ask_qty
             }
         else:
-            print(f"Gate.io API beklenmeyen yanıt formatı: {data}")
+            print(f"KuCoin API hata döndürdü: {data}")
             return None
+    except requests.exceptions.Timeout:
+        print("KuCoin API zaman aşımı hatası")
+        return None
+    except requests.exceptions.ConnectionError:
+        print("KuCoin API bağlantı hatası")
+        return None
     except Exception as e:
-        print(f"Gate.io veri çekme hatası: {e}")
+        print(f"KuCoin veri çekme hatası: {e}")
+        import traceback
+        traceback.print_exc()  # Tam hata izlemeyi yazdır
         return None
 
 def collect_all_exchange_data():
@@ -199,26 +310,46 @@ def collect_all_exchange_data():
     binance_data = get_binance_data()
     if binance_data:
         exchange_data.append(binance_data)
+        print(f"✅ Binance verileri başarıyla alındı")
+    else:
+        print(f"❌ Binance verilerini alamadık")
     
     okx_data = get_okx_data()
     if okx_data:
         exchange_data.append(okx_data)
+        print(f"✅ OKX verileri başarıyla alındı")
+    else:
+        print(f"❌ OKX verilerini alamadık")
     
     coinbase_data = get_coinbase_data()
     if coinbase_data:
         exchange_data.append(coinbase_data)
+        print(f"✅ Coinbase verileri başarıyla alındı")
+    else:
+        print(f"❌ Coinbase verilerini alamadık")
     
     kraken_data = get_kraken_data()
     if kraken_data:
         exchange_data.append(kraken_data)
+        print(f"✅ Kraken verileri başarıyla alındı")
+    else:
+        print(f"❌ Kraken verilerini alamadık")
     
     bybit_data = get_bybit_data()
     if bybit_data:
         exchange_data.append(bybit_data)
+        print(f"✅ Bybit verileri başarıyla alındı")
+    else:
+        print(f"❌ Bybit verilerini alamadık")
     
-    gate_io_data = get_gate_io_data()
-    if gate_io_data:
-        exchange_data.append(gate_io_data)
+    kucoin_data = get_kucoin_data()
+    if kucoin_data:
+        exchange_data.append(kucoin_data)
+        print(f"✅ KuCoin verileri başarıyla alındı")
+    else:
+        print(f"❌ KuCoin verilerini alamadık")
+    
+    print(f"\n✅ Toplam {len(exchange_data)} borsadan veri alındı")
     
     return exchange_data
 
