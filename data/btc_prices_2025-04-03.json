@@ -22,5 +22,29 @@
     "ask": 81882.01,
     "bid_qty": 0.0005,
     "ask_qty": 1.097857
+  },
+  {
+    "exchange": "Coinbase",
+    "timestamp": "2025-04-03 15:30:32",
+    "bid": 81691.55,
+    "ask": 81691.55,
+    "bid_qty": null,
+    "ask_qty": null
+  },
+  {
+    "exchange": "Kraken",
+    "timestamp": "2025-04-03 15:30:32",
+    "bid": 81711.5,
+    "ask": 81711.6,
+    "bid_qty": 1.0,
+    "ask_qty": 4.0
+  },
+  {
+    "exchange": "Huobi",
+    "timestamp": "2025-04-03 15:30:32",
+    "bid": 81771.59,
+    "ask": 81771.7,
+    "bid_qty": 0.250311,
+    "ask_qty": 0.00175
   }
 ]
