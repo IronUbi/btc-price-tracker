@@ -1,0 +1,43 @@
+name: BTC Price Tracker
+
+on:
+  schedule:
+    - cron: '*/1 * * * *'  # Her 1 dakikada bir çalışır
+  workflow_dispatch:  # Manuel olarak da tetiklenebilir
+
+jobs:
+  fetch-btc-prices:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.9'
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests pandas pytz
+        
+    - name: Run price tracker script
+      run: python crypto_price_tracker.py
+      
+    - name: Configure Git
+      run: |
+        git config --global user.name "GitHub Actions Bot"
+        git config --global user.email "actions@github.com"
+        
+    - name: Commit and push if changes
+      run: |
+        git add data/
+        # Değişiklik olup olmadığını kontrol et
+        if git diff --staged --quiet; then
+          echo "No changes to commit"
+        else
+          git commit -m "Update BTC price data: $(date '+%Y-%m-%d %H:%M:%S')"
+          git push
+        fi
