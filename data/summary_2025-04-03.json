@@ -1,0 +1,33 @@
+{
+  "date": "2025-04-03",
+  "latest_update": "2025-04-03 15:23:16",
+  "best_exchange_to_buy": "Coinbase",
+  "best_exchange_to_sell": "Huobi",
+  "arbitrage_opportunity": 57.57499999999709,
+  "exchange_data": [
+    {
+      "exchange": "Coinbase",
+      "timestamp": "2025-04-03 15:18:32",
+      "bid": 81824.425,
+      "ask": 81824.425,
+      "bid_qty": NaN,
+      "ask_qty": NaN
+    },
+    {
+      "exchange": "Huobi",
+      "timestamp": "2025-04-03 15:18:32",
+      "bid": 81882.0,
+      "ask": 81882.01,
+      "bid_qty": 0.0005,
+      "ask_qty": 1.097857
+    },
+    {
+      "exchange": "Kraken",
+      "timestamp": "2025-04-03 15:18:32",
+      "bid": 81828.0,
+      "ask": 81828.1,
+      "bid_qty": 1.0,
+      "ask_qty": 7.0
+    }
+  ]
+}
