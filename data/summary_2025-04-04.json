@@ -1,41 +1,41 @@
 {
   "date": "2025-04-04",
-  "latest_update": "2025-04-04 10:33:48",
+  "latest_update": "2025-04-04 10:45:48",
   "best_exchange_to_buy": "Coinbase",
   "best_exchange_to_sell": "OKX",
   "arbitrage_opportunity": 1902.1300000000047,
   "exchange_data": [
     {
       "exchange": "Coinbase",
-      "timestamp": "2025-04-04 10:33:47",
-      "bid": 83033.83,
-      "ask": 83033.84,
-      "bid_qty": 3.35e-06,
-      "ask_qty": 0.25706884
+      "timestamp": "2025-04-04 10:45:48",
+      "bid": 82661.94,
+      "ask": 82661.95,
+      "bid_qty": 0.00058804,
+      "ask_qty": 0.22760924
     },
     {
       "exchange": "Kraken",
-      "timestamp": "2025-04-04 10:33:47",
-      "bid": 83043.0,
-      "ask": 83043.1,
+      "timestamp": "2025-04-04 10:45:48",
+      "bid": 82663.4,
+      "ask": 82663.5,
       "bid_qty": 1.0,
-      "ask_qty": 8.0
+      "ask_qty": 4.0
     },
     {
       "exchange": "KuCoin",
-      "timestamp": "2025-04-04 10:33:48",
-      "bid": 83027.1,
-      "ask": 83027.2,
+      "timestamp": "2025-04-04 10:45:48",
+      "bid": 82672.7,
+      "ask": 82672.8,
       "bid_qty": NaN,
       "ask_qty": NaN
     },
     {
       "exchange": "OKX",
-      "timestamp": "2025-04-04 10:33:47",
-      "bid": 83062.0,
-      "ask": 83064.3,
-      "bid_qty": 0.1009,
-      "ask_qty": 0.31055
+      "timestamp": "2025-04-04 10:45:47",
+      "bid": 82668.0,
+      "ask": 82672.0,
+      "bid_qty": 0.58816211,
+      "ask_qty": 0.17117697
     }
   ]
 }
