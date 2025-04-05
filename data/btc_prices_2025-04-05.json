@@ -958,5 +958,37 @@
     "ask": 83677.8,
     "bid_qty": null,
     "ask_qty": null
+  },
+  {
+    "exchange": "OKX",
+    "timestamp": "2025-04-05 09:30:50",
+    "bid": 83711.4,
+    "ask": 83711.5,
+    "bid_qty": 1.3647428,
+    "ask_qty": 0.12274334
+  },
+  {
+    "exchange": "Coinbase",
+    "timestamp": "2025-04-05 09:30:50",
+    "bid": 83680.36,
+    "ask": 83680.37,
+    "bid_qty": 0.05626102,
+    "ask_qty": 0.05316423
+  },
+  {
+    "exchange": "Kraken",
+    "timestamp": "2025-04-05 09:30:51",
+    "bid": 83678.3,
+    "ask": 83678.4,
+    "bid_qty": 1.0,
+    "ask_qty": 3.0
+  },
+  {
+    "exchange": "KuCoin",
+    "timestamp": "2025-04-05 09:30:51",
+    "bid": 83706.8,
+    "ask": 83706.9,
+    "bid_qty": null,
+    "ask_qty": null
   }
 ]
